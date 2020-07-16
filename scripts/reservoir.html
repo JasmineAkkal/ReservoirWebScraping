@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html>
+  <head>
+   <link rel="stylesheet" href="//cdn.leafletjs.com/leaflet-0.7.5/leaflet.css" />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body onload="initMap()">
+
+	 <div id="map"></div>
+	 <hr>
+	 <div id="container" style="min-width: 300px; height: 400px; margin: 0 auto"></div>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
+<script src="https://code.highcharts.com/highcharts.js"></script>
+<script src="https://code.highcharts.com/modules/exporting.js"></script>
+<script src="https://code.highcharts.com/modules/export-data.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.3.4/leaflet.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/d3/5.7.0/d3.min.js"></script>
+    <script type="text/javascript" src="LiquidFillGauge.js"></script>
+ <script src="https://d3js.org/d3.v4.min.js"></script>
+	<script type="text/javascript" src="http://code.jquery.com/jquery-1.7.2.js"></script>
+<script type="text/javascript" src="https://cdn.datatables.net/1.10.18/js/jquery.dataTables.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+	  <script>
+	  function highCharts(){
+	  usedWaterLevel = [waterLevels[2],waterLevels[0],waterLevels[18],waterLevels[27],waterLevels[44],waterLevels[47],waterLevels[54],0,waterLevels[58],waterLevels[59],0,waterLevels[7]]
+		var hightChartData = [];
+		var reservoir = ['Trinity Lake','Shasta Lake', 'Oroville Lake', 'Folsom Lake', 'New Melones Lake','Don Pedro Reservior','McClure Lake','San Luis Reservior','Milerton Lake','Pine Flat Lake','Perris reservior','Castic Lake'];
+	  for(var i=0;i<latitude.length;i++){
+	  var obj = [];
+	  obj = [reservoir[i],usedWaterLevel[i]];
+	  hightChartData.push(obj);
+	  }
+	  Highcharts.chart('container', {
+		chart: {
+			type: 'column'
+		},
+		title: {
+			text: 'Water Level of Reservoirs of California'
+		},
+		subtitle: {
+			text: 'Source: <a href="https://cdec.water.ca.gov/cgi-progs/getAll?sens_num=15">California Data Exchange Center</a>'
+		},
+		xAxis: {
+			type: 'Reservoirs',
+			categories:['Trinity Lake','Shasta Lake', 'Oroville Lake', 'Folsom Lake', 'New Melones Lake','Don Pedro Reservior','McClure Lake','San Luis Reservior','Milerton Lake','Pine Flat Lake','Perris reservior','Castic Lake'],
+			labels: {
+				rotation: -45,
+				style: {
+					fontSize: '13px',
+					fontFamily: 'Verdana, sans-serif'
+				}
+			}
+		},
+		yAxis: {
+			min: 0,
+			title: {
+				text: 'Water Level'
+			}
+		},
+		legend: {
+			enabled: false
+		},
+		tooltip: {
+			pointFormat: 'Water Level at Current Time: <b>{point.y:.1f} AF</b>'
+		},
+		series: [{
+			name: 'Population',
+			data: hightChartData,
+			dataLabels: {
+				enabled: true,
+				rotation: -90,
+				color: '#FFFFFF',
+				align: 'right',
+				format: '{point.y:.1f}', // one decimal
+				y: 10, // 10 pixels down from the top
+				style: {
+					fontSize: '13px',
+					fontFamily: 'Verdana, sans-serif'
+				}
+			}
+		}]
+	});
+	}
+	  </script>
+
+	<script>
+	var waterLevels = [];
+	var usedWaterLevel = [];
+	var latitude = [];
+	var longitude = [];
+	function mainFunction(){
+	
+	 $.getJSON('http://www.whateverorigin.org/get?url=' + encodeURIComponent('https://cdec.water.ca.gov/cgi-progs/getAll?sens_num=15') + '&callback=?', function(data){
+    var scrapData = data.contents;
+        $(scrapData).find('table td:nth-child(5) a').each(function(){
+            waterLevels.push(parseInt($(this).html().replace("AF","").trim()));
+        });
+		console.log(waterLevels);
+		});
+		
+		}
+		 function initMap() {
+        var myLatLng = {lat: 40.924509, lng: -122.8869321};
+
+        var map = new google.maps.Map(document.getElementById('map'), {
+          zoom: 4,
+          center: myLatLng
+        });
+		
+		latitude = [40.924509, 40.8215133, 39.6276323,38.7446334,38.0293566, 37.7847037,37.63744839,37.0448547,37.0316565,36.8745885, 33.8565413,34.5414173];
+		longitude = [ -122.8869321, -122.375796, -121.5643235,-121.1622197,-120.6146217, -120.5028911, -120.2748166, -121.1941637, -119.6765478, -119.3538096,-117.1934006,-118.6341452];
+			for (var i = 0; i < latitude.length; i++) {
+				  var lati = latitude[i];
+				  var longi = longitude[i];
+				  //new L.Marker([lati, longi]).bindPopup(content, {'value': waterLevels[i]}).addTo(map)
+				  //new L.Marker([0, 45]).bindPopup(content, {'value': 66}).addTo(map)
+				  var latLng = new google.maps.LatLng(lati,longi);
+				  //var iVal = this.replace('<svg id="gauge" width="100" height="100"></svg>',"").trim();
+				  var contentString = waterLevels[i]
+				  latitude.forEach(function(feature) {
+				  var marker = new google.maps.Marker({
+					position: latLng,
+					map: map,
+					//icon: icons[data.locations.location[i].type].icon,
+					
+					content: contentString
+				  });
+				  var infowindow = new google.maps.InfoWindow();
+				  marker.addListener('click', function() {
+				  //debugger;
+
+				  /*for(var i=0; i<this.content.length; i++){
+				  if(this.content[i])
+				  }*/
+				 // var iVal = this.content.replace('<svg id="gauge" width="100" height="100"></svg>',"").trim();
+				  
+				  infowindow.setContent('<svg id="gauge" width="100" height="100"></svg>');
+				  d3.select("#gauge").call(d3.liquidfillgauge, this.content*100/2175394);
+				  infowindow.open(map, marker);
+				  
+				});
+        });
+	}
+			mainFunction();	  
+			setInterval(mainFunction,4000);	
+		highCharts();
+		setInterval(highCharts,4000);		
+       
+      }
+	</script>
+	<script>
+
+     
+    </script>
+	<script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC8E-rdFsN24W5yP59JQmqlcu-_NU2DkUo&callback=mainFunction"
+  type="text/javascript"></script>
+  </body>
+</html>
